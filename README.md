@@ -16,7 +16,7 @@ package main
 
 import (
 	"fmt"
-  "io/ioutil"
+  	"io/ioutil"
 
 	"github.com/ecarter202/scrapingbee-go"
 )
