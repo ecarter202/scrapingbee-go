@@ -24,14 +24,14 @@ import (
 func main() {
 	client := scrapingbee.New("myapikey")
   
-  params := &scrapingbee.ReqParams{
-    JavascriptRendering:  true,
-    PremiumProxies:       true,
-    BlockAds:             true,
-  }
-  params.AddHeader("X-Custom", "myvalue")
-  
-  res, _ := client.Get("https://newegg.com", params)
-  ...
+  	params := &scrapingbee.ReqParams{
+		JavascriptRendering:  true,
+	 	PremiumProxies:       true,
+	   	BlockAds:             true,
+	}
+	params.AddHeader("X-Custom", "myvalue")
+
+	res, _ := client.Get("https://newegg.com", params)
+	...
 }
 `````
