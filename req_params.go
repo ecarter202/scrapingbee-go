@@ -61,6 +61,10 @@ type ReqParams struct {
 // Headers are forwarded to the website you want to scrape.
 // Learn more at: https://www.scrapingbee.com/documentation/#header-forwarding
 func (rp *ReqParams) AddHeader(key, value string) {
+	if rp.headers == nil {
+		rp.headers = make(map[string]string)
+	}
+
 	rp.headers[key] = value
 }
 
@@ -68,5 +72,9 @@ func (rp *ReqParams) AddHeader(key, value string) {
 // Cookies are forwarded to the website you want to scrape.
 // Learn more at: https://www.scrapingbee.com/documentation/#custom-cookies
 func (rp *ReqParams) AddCookie(key, value string) {
+	if rp.cookies == nil {
+		rp.cookies = make(map[string]string)
+	}
+
 	rp.cookies[key] = value
 }

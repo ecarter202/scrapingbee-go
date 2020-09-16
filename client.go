@@ -1,9 +1,12 @@
 package scrapingbee
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -38,8 +41,8 @@ func (c *Client) Get(target string, params *ReqParams) (res *http.Response, err 
 	values := uri.Query()
 	values.Set("api_key", c.apikey)
 	values.Set("url", target)
-	if params.JavascriptRendering {
-		values.Set("render_us", btos(params.JavascriptRendering))
+	if params != nil && params.JavascriptRendering {
+		values.Set("render_js", btos(params.JavascriptRendering))
 		if params.PremiumProxies {
 			values.Set("premium_proxy", "true")
 			if string(params.CountryCode) != "" {
@@ -64,6 +67,19 @@ func (c *Client) Get(target string, params *ReqParams) (res *http.Response, err 
 		if params.BlockAds {
 			values.Set("block_resources", "true")
 		}
+	} else {
+		values.Set("render_js", "false")
+	}
+
+	if params != nil && len(params.headers) > 0 {
+		values.Set("forward_headers", "true")
+	}
+	if params != nil && len(params.cookies) > 0 {
+		var cookieX []string
+		for k, v := range params.cookies {
+			cookieX = append(cookieX, k+"="+v)
+		}
+		values.Set("cookies", strings.Join(cookieX, ";"))
 	}
 
 	uri.RawQuery = values.Encode()
@@ -72,17 +88,30 @@ func (c *Client) Get(target string, params *ReqParams) (res *http.Response, err 
 	if err != nil {
 		return nil, err
 	}
-	for hk, hv := range params.headers {
-		req.Header.Add(hk, hv)
-	}
-	for ck, cv := range params.cookies {
-		req.AddCookie(&http.Cookie{
-			Name:  ck,
-			Value: cv,
-		})
+	if params != nil {
+		for hk, hv := range params.headers {
+			req.Header.Add(hk, hv)
+		}
 	}
 
 	return c.Do(req)
+}
+
+// Usage gets the usage stats for your account.
+func (c *Client) Usage() (stats *UsageStats, err error) {
+	uri := fmt.Sprintf("%s%s?api_key=%s", baseURL, "usage", c.apikey)
+
+	res, err := http.Get(uri)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	if err := json.NewDecoder(res.Body).Decode(&stats); err != nil {
+		return nil, err
+	}
+
+	return stats, nil
 }
 
 func btos(b bool) (s string) {
